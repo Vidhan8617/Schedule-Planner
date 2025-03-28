@@ -1,12 +1,13 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Book, FileText, UserRound, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { AddCourseDialog, Course } from "@/components/courses/AddCourseDialog";
 
-type Course = {
+type CourseData = {
   id: string;
   code: string;
   name: string;
@@ -16,7 +17,7 @@ type Course = {
   credits: number;
 };
 
-const courses: Course[] = [
+const initialCourses: CourseData[] = [
   {
     id: "1",
     code: "MATH 101",
@@ -74,6 +75,17 @@ const courses: Course[] = [
 ];
 
 export default function Courses() {
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [courses, setCourses] = useState<CourseData[]>(initialCourses);
+
+  const handleCourseAdded = (course: Course) => {
+    const newCourse: CourseData = {
+      ...course,
+      id: (courses.length + 1).toString()
+    };
+    setCourses([...courses, newCourse]);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -83,7 +95,10 @@ export default function Courses() {
             Manage your enrolled courses and materials.
           </p>
         </div>
-        <Button className="bg-edu-purple hover:bg-edu-dark-purple">
+        <Button 
+          className="bg-edu-purple hover:bg-edu-dark-purple self-start"
+          onClick={() => setIsAddDialogOpen(true)}
+        >
           <Plus className="h-4 w-4 mr-2" /> Add Course
         </Button>
       </div>
@@ -125,6 +140,12 @@ export default function Courses() {
           </Card>
         ))}
       </div>
+
+      <AddCourseDialog 
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onCourseAdded={handleCourseAdded}
+      />
     </div>
   );
 }

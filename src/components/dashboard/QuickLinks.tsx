@@ -2,8 +2,9 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, CheckSquare, Plus, Calendar } from "lucide-react";
+import { BookOpen, CheckSquare, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 type QuickLink = {
   id: string;
@@ -19,21 +20,21 @@ const quickLinks: QuickLink[] = [
     label: "Add Class",
     icon: <Calendar className="h-5 w-5" />,
     color: "bg-edu-soft-blue",
-    href: "/timetable/add",
+    href: "/timetable",
   },
   {
     id: "2",
     label: "New Assignment",
     icon: <CheckSquare className="h-5 w-5" />,
     color: "bg-edu-soft-green",
-    href: "/assignments/add",
+    href: "/assignments",
   },
   {
     id: "3",
     label: "Add Course",
     icon: <BookOpen className="h-5 w-5" />,
     color: "bg-edu-soft-yellow",
-    href: "/courses/add",
+    href: "/courses",
   },
 ];
 
@@ -53,11 +54,14 @@ export function QuickLinks() {
               "h-auto w-full py-6 px-4 flex flex-col items-center justify-center gap-3 border-2 hover-scale",
               link.color
             )}
+            asChild
           >
-            <div className="bg-white p-2 rounded-full">
-              {link.icon}
-            </div>
-            <span className="font-medium">{link.label}</span>
+            <Link to={link.href}>
+              <div className="bg-white p-2 rounded-full">
+                {link.icon}
+              </div>
+              <span className="font-medium">{link.label}</span>
+            </Link>
           </Button>
         ))}
       </CardContent>
