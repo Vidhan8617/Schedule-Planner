@@ -1,9 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { AddClassDialog } from "./AddClassDialog";
 
 type ClassEvent = {
   id: string;
@@ -15,7 +17,8 @@ type ClassEvent = {
   color: string;
 };
 
-const classes: ClassEvent[] = [
+// Sample data for initial classes
+const initialClasses: ClassEvent[] = [
   {
     id: "1",
     subject: "Mathematics",
@@ -96,8 +99,57 @@ const timeSlots = [
   "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
 ];
 
+// Colors for new classes
+const classColors = [
+  "bg-edu-soft-blue",
+  "bg-edu-soft-green",
+  "bg-edu-soft-yellow",
+  "bg-edu-soft-pink",
+  "bg-edu-soft-purple",
+];
+
 export function TimeTable() {
+  const { toast } = useToast();
   const [currentWeek, setCurrentWeek] = React.useState(0);
+  const [classes, setClasses] = useState<ClassEvent[]>(initialClasses);
+
+  // Function to navigate to previous week
+  const goToPreviousWeek = () => {
+    setCurrentWeek(prev => prev - 1);
+    toast({
+      title: `Week ${currentWeek - 1}`,
+      description: currentWeek - 1 === 0 
+        ? "Viewing current week" 
+        : currentWeek - 1 < 0 
+          ? `Viewing ${Math.abs(currentWeek - 1)} weeks ago` 
+          : `Viewing ${currentWeek - 1} weeks ahead`,
+    });
+  };
+
+  // Function to navigate to next week
+  const goToNextWeek = () => {
+    setCurrentWeek(prev => prev + 1);
+    toast({
+      title: `Week ${currentWeek + 1}`,
+      description: currentWeek + 1 === 0 
+        ? "Viewing current week" 
+        : currentWeek + 1 < 0 
+          ? `Viewing ${Math.abs(currentWeek + 1)} weeks ago` 
+          : `Viewing ${currentWeek + 1} weeks ahead`,
+    });
+  };
+
+  // Function to add a new class
+  const handleAddClass = (newClass: Omit<ClassEvent, "id" | "color">) => {
+    // Generate a unique ID
+    const id = (classes.length + 1).toString();
+    
+    // Pick a random color from the available colors
+    const color = classColors[Math.floor(Math.random() * classColors.length)];
+    
+    // Add the new class to the list
+    setClasses([...classes, { ...newClass, id, color }]);
+  };
 
   // Function to calculate class position in the timetable grid
   const getClassPosition = (startTime: string, endTime: string) => {
@@ -127,7 +179,7 @@ export function TimeTable() {
             <Button 
               variant="outline" 
               size="icon"
-              onClick={() => setCurrentWeek(currentWeek - 1)}
+              onClick={goToPreviousWeek}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -135,13 +187,11 @@ export function TimeTable() {
             <Button 
               variant="outline" 
               size="icon"
-              onClick={() => setCurrentWeek(currentWeek + 1)}
+              onClick={goToNextWeek}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
-            <Button size="sm" className="bg-edu-purple hover:bg-edu-dark-purple ml-2">
-              <Plus className="h-4 w-4 mr-1" /> Add Class
-            </Button>
+            <AddClassDialog onAddClass={handleAddClass} />
           </div>
         </div>
         
@@ -207,6 +257,10 @@ export function TimeTable() {
                             top: position.top,
                             height: position.height,
                           }}
+                          onClick={() => toast({
+                            title: classItem.subject,
+                            description: `${classItem.startTime} - ${classItem.endTime} at ${classItem.location}`,
+                          })}
                         >
                           <div className="font-medium text-sm truncate">{classItem.subject}</div>
                           <div className="text-xs opacity-80 truncate">{classItem.location}</div>
